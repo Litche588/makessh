@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>شرح طريقة صنع كونفينقات سيرفرات SSH - DZ-CONFIG</title>
+
+    <!-- أيقونة الموقع (Favicon) -->
+    <link rel="icon" type="image/png" href="logo.png">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #0d0d0d;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+
+        /* رأس الصفحة والأيقونة */
+        .header-brand {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0 10px;
+        }
+
+        .app-logo {
+            width: 70px;
+            height: 70px;
+            border-radius: 16px;
+            box-shadow: 0 0 15px rgba(255, 30, 30, 0.4);
+            object-fit: cover;
+        }
+
+        /* عنوان الموقع */
+        h1.app-title {
+            color: #ff1e1e;
+            font-size: 2.5rem;
+            font-weight: 800;
+            text-shadow: 0 0 15px rgba(255, 30, 30, 0.4);
+        }
+
+        p.subtitle {
+            color: #aaaaaa;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+
+        /* قسم الشروحات والفيديوهات والأدوات */
+        .section {
+            background-color: #161616;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            text-align: right;
+        }
+
+        .section h2 {
+            color: #ff1e1e;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            border-bottom: 1px solid #2a2a2a;
+            padding-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section p.desc {
+            color: #cccccc;
+            font-size: 0.95rem;
+            margin-bottom: 12px;
+            line-height: 1.6;
+        }
+
+        /* رابط موقع vpnjantit */
+        .ext-link {
+            display: inline-block;
+            color: #64b5f6;
+            text-decoration: none;
+            font-weight: bold;
+            margin-bottom: 10px;
+            transition: 0.2s;
+        }
+
+        .ext-link:hover {
+            color: #90caf9;
+            text-decoration: underline;
+        }
+
+        /* مشغل الفيديو المحلي */
+        .video-container {
+            width: 100%;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #333;
+            margin-top: 10px;
+            background-color: #000;
+        }
+
+        .video-container video {
+            width: 100%;
+            max-height: 450px;
+            display: block;
+            outline: none;
+        }
+
+        /* أزرار النسخ والروابط */
+        .copy-box {
+            background-color: #1f1f1f;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .copy-text {
+            font-family: monospace;
+            background-color: #0a0a0a;
+            color: #00ff66;
+            padding: 10px;
+            border-radius: 6px;
+            word-break: break-all;
+            direction: ltr;
+            text-align: left;
+            font-size: 0.9rem;
+            border: 1px solid #222;
+        }
+
+        .btn-copy {
+            background-color: #2e7d32;
+            color: #ffffff;
+            padding: 10px 16px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .btn-copy:hover {
+            background-color: #388e3c;
+            box-shadow: 0 0 10px rgba(56, 142, 60, 0.4);
+        }
+
+        /* الأزرار الرئيسية */
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            margin: 12px 0;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+
+        .btn-blue {
+            background-color: #1565c0;
+            color: #ffffff;
+        }
+
+        .btn-blue:hover {
+            background-color: #1e88e5;
+            box-shadow: 0 0 15px rgba(30, 136, 229, 0.4);
+        }
+
+        /* واجهة القنوات */
+        .channels-modal {
+            display: none;
+            margin-top: 20px;
+            background-color: #121212;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .channels-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .channel-card {
+            background-color: #1e1e1e;
+            color: #fff;
+            padding: 14px;
+            border-radius: 8px;
+            text-decoration: none;
+            border: 1px solid #333;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+        }
+
+        .channel-card:hover {
+            border-color: #1e88e5;
+            background-color: #252525;
+            color: #64b5f6;
+        }
+
+        /* أزرار الروابط الاجتماعية */
+        .social-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .social-btn {
+            background-color: #1a1a1a;
+            color: #cccccc;
+            padding: 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            border: 1px solid #333;
+            font-size: 0.95rem;
+            transition: 0.3s;
+            text-align: center;
+        }
+
+        .social-btn:hover {
+            background-color: #2a2a2a;
+            color: #ffffff;
+            border-color: #ff1e1e;
+        }
+
+        footer {
+            margin-top: 40px;
+            color: #666;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- الشعار واسم الموقع -->
+    <div class="header-brand">
+        <img src="logo.png" alt="DZ-CONFIG Logo" class="app-logo">
+        <h1 class="app-title">صنع كونفينقات سيرفرات SSH</h1>
+    </div>
+    <p class="subtitle">طريقة إنشاء وحفظ إعدادات SSH وتطبيقها على Dark Tunnel بالتفصيل</p>
+
+    <!-- الجزء الأول -->
+    <div class="section">
+        <h2>📌 الجزء الأول: إنشاء حساب SSH</h2>
+        <p class="desc">في هذا الجزء نشرح طريقة إنشاء حساب SSH مجاني عبر موقع VpnJantit لاستخدامه في إنشاء الكونفينق.</p>
+        <p><a href="https://www.vpnjantit.com/" class="ext-link" target="_blank">🌐 زيارة موقع VPNJANTIT (vpnjantit.com)</a></p>
+        <div class="video-container">
+            <video controls preload="metadata">
+                <source src="ssh_part1.mp4" type="video/mp4">
+                متصفحك لا يدعم تشغيل هذا الفيديو.
+            </video>
+        </div>
+    </div>
+
+    <!-- الجزء الثاني -->
+    <div class="section">
+        <h2>📌 الجزء الثاني: إضافة معلومات SSH إلى Dark Tunnel</h2>
+        <p class="desc">في هذا الفيديو نوضح كيفية إدخال بيانات السيرفر، البايلاود، والبروكسي داخل تطبيق Dark Tunnel للاتصال بنجاح.</p>
+        <div class="video-container">
+            <video controls preload="metadata">
+                <source src="ssh_part2.mp4" type="video/mp4">
+                متصفحك لا يدعم تشغيل هذا الفيديو.
+            </video>
+        </div>
+    </div>
+
+    <!-- قسم الأدوات وقيم النسخ -->
+    <div class="section">
+        <h2>📋 أدوات الإعدادات (Payloads & Proxy)</h2>
+
+        <!-- Payload Youtube -->
+        <div class="copy-box">
+            <span style="color: #64b5f6; font-weight: bold;">🔴 Payload Youtube:</span>
+            <div class="copy-text" id="payloadYoutube">CONNECT [host_port] [protocol][crlf]Host: youtube.com[crlf][crlf]</div>
+            <button class="btn-copy" onclick="copyToClipboard('payloadYoutube', this)">📋 نسخ Payload Youtube</button>
+        </div>
+
+        <!-- Payload Snapchat -->
+        <div class="copy-box">
+            <span style="color: #64b5f6; font-weight: bold;">🟡 Payload Snapchat:</span>
+            <div class="copy-text" id="payloadSnapchat">CONNECT [host_port] [protocol][crlf]Host: apis.snapchat.com[crlf][crlf]</div>
+            <button class="btn-copy" onclick="copyToClipboard('payloadSnapchat', this)">📋 نسخ Payload Snapchat</button>
+        </div>
+
+        <!-- Proxy -->
+        <div class="copy-box">
+            <span style="color: #64b5f6; font-weight: bold;">🌐 البروكسي (Proxy):</span>
+            <div class="copy-text" id="proxyText">34.43.46.91:80</div>
+            <button class="btn-copy" onclick="copyToClipboard('proxyText', this)">📋 نسخ البروكسي</button>
+        </div>
+    </div>
+
+    <!-- شبكة روابط التواصل والدعم -->
+    <div class="social-grid">
+        <a href="https://t.me/L1tche" class="social-btn" target="_blank">💬 Litche Telegram</a>
+        <a href="https://github.com/Litche588" class="social-btn" target="_blank"> GitHub</a>
+        <a href="https://t.me/DZCONFI" class="social-btn" target="_blank">📢 DZ-CONFIG</a>
+        <a href="https://t.me/DZTEAMDEV" class="social-btn" target="_blank">🛠️ DZ-TEAM-DEV</a>
+    </div>
+
+    <!-- زر القنوات والمجتمع -->
+    <button class="btn btn-blue" onclick="toggleChannels()">🌐 قنوات التلجرام أخرى والمجتمع 🌐</button>
+
+    <!-- واجهة القنوات (تظهر عند الضغط) -->
+    <div id="channelsModal" class="channels-modal">
+        <h3 style="color: #64b5f6; margin-bottom: 10px;">قنوات المجتمع نشطة </h3>
+        <div id="channelsContainer" class="channels-grid">
+            <p style="color: #aaa;">جاري جلب القنوات...</p>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; DZ-CONFIG - All Rights Reserved - by Litche</p>
+    </footer>
+</div>
+
+<script>
+    const GITHUB_JSON_URL = "https://raw.githubusercontent.com/Litche588/NetChecker/main/channels.json";
+
+    function copyToClipboard(elementId, btnElement) {
+        const textToCopy = document.getElementById(elementId).innerText;
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            const originalText = btnElement.innerText;
+            btnElement.innerText = "✅ تم النسخ!";
+            btnElement.style.backgroundColor = "#1b5e20";
+            setTimeout(() => {
+                btnElement.innerText = originalText;
+                btnElement.style.backgroundColor = "#2e7d32";
+            }, 2000);
+        }).catch(err => {
+            alert("حدث خطأ أثناء النسخ");
+        });
+    }
+
+    function toggleChannels() {
+        const modal = document.getElementById("channelsModal");
+        if (modal.style.display === "none" || modal.style.display === "") {
+            modal.style.display = "block";
+            loadChannels();
+        } else {
+            modal.style.display = "none";
+        }
+    }
+
+    function loadChannels() {
+        const container = document.getElementById("channelsContainer");
+        
+        fetch(GITHUB_JSON_URL)
+            .then(response => response.json())
+            .then(data => {
+                container.innerHTML = "";
+                const channels = data.slice(0, 15);
+
+                channels.forEach(ch => {
+                    const a = document.createElement("a");
+                    a.className = "channel-card";
+                    a.href = ch.url;
+                    a.target = "_blank";
+                    a.innerText = ch.name;
+                    container.appendChild(a);
+                });
+            })
+            .catch(error => {
+                container.innerHTML = "<p style='color: #ff5252;'>فشل جلب القنوات. channels.json بشكل صحيح.</p>";
+            });
+    }
+</script>
+
+</body>
+</html>
